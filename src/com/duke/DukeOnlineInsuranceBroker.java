@@ -1,10 +1,10 @@
 package com.duke;
 
-import com.duke.insurance.Purchase;
 import com.duke.insurance.ProductionPurchaseCompletionSystem;
+import com.duke.insurance.Purchase;
 import com.duke.search.Policy;
-import com.duke.search.Quote;
 import com.duke.search.ProductionQuotingSystem;
+import com.duke.search.Quote;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -15,12 +15,21 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
 
     public static final BigDecimal STANDARD_ADMIN_CHARGE = new BigDecimal(10);
 
+    private final QuotingSystem quotingSystem;
+    private final PurchaseService purchaseCompletionService;
+
     private Map<UUID, Quote> quotes = new HashMap<UUID, Quote>();
+
+    public DukeOnlineInsuranceBroker() {
+
+        quotingSystem = new OxQuotingSystem();
+        purchaseCompletionService = new OxPurchaseCompletionSystem();
+    }
 
     @Override
     public List<Policy> searchForCarInsurance(String make, String model, int year) {
 
-        List<Policy> searchResults = ProductionQuotingSystem.getInstance().searchFor(make, model, year);
+        List<Policy> searchResults = quotingSystem.searchFor(make, model, year);
         for (Policy policy : searchResults) {
             quotes.put(policy.id, new Quote(policy, System.currentTimeMillis()));
         }
@@ -44,7 +53,6 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
 
         Purchase completePurchase = new Purchase(quote.policy.premium.add(STANDARD_ADMIN_CHARGE), quote, timeNow, userAuthToken);
 
-        ProductionPurchaseCompletionSystem.getInstance().process(completePurchase);
+        purchaseCompletionService.process(completePurchase);
     }
-
 }
