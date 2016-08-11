@@ -33,7 +33,7 @@ public class DukeOnlineInsuranceBrokerTest {
     @Test
     public void searchForCarInsuranceForAnUnknownVehicleShouldReturnEmptyListOfPolicies() {
 
-        DukeOnlineInsuranceBroker insuranceBroker = new DukeOnlineInsuranceBroker();
+        DukeOnlineInsuranceBroker insuranceBroker = new DukeOnlineInsuranceBroker(new OxQuotingSystem(), new OxPurchaseCompletionSystem(), new StandardAdminChargeCalculator(), new StandardQuoteAgeLimitProvider());
         List<Policy> searchResults = insuranceBroker.searchForCarInsurance("unknown", "A1", 2014);
 
         assertEquals("Search for invalid information should return empty list of policies", 0, searchResults.size());

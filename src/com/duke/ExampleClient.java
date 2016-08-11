@@ -10,7 +10,7 @@ import java.util.*;
 public class ExampleClient {
     public static void main(String[] args) throws Exception
     {
-        InsuranceBroker insuranceBroker = new DukeOnlineInsuranceBroker();
+        InsuranceBroker insuranceBroker = new DukeOnlineInsuranceBroker(new OxQuotingSystem(), new OxPurchaseCompletionSystem(), new StandardAdminChargeCalculator(), new StandardQuoteAgeLimitProvider());
         String userAuthToken = "tom@example.com";
         List<Policy> searchResults = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014);
         // try also Toyota Prius, Tesla Model S, etc

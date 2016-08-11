@@ -11,17 +11,23 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
 
     private final QuotingSystem quotingSystem;
     private final PurchaseService purchaseCompletionService;
-    private final StandardAdminChargeCalculator adminChargeCalculator;
-    private final StandardQuoteAgeLimitProvider maxQuoteAgeLimitProvider;
+    private final AdminChargeCalculator adminChargeCalculator;
+    private final QuoteAgeLimitProvider maxQuoteAgeLimitProvider;
 
     private Map<UUID, Quote> quotes = new HashMap<UUID, Quote>();
 
-    public DukeOnlineInsuranceBroker() {
+//    public DukeOnlineInsuranceBroker() {
+//        quotingSystem = new OxQuotingSystem();
+//        purchaseCompletionService = new OxPurchaseCompletionSystem();
+//        adminChargeCalculator = new StandardAdminChargeCalculator();
+//        maxQuoteAgeLimitProvider = new StandardQuoteAgeLimitProvider();
+//    }
 
-        quotingSystem = new OxQuotingSystem();
-        purchaseCompletionService = new OxPurchaseCompletionSystem();
-        adminChargeCalculator = new StandardAdminChargeCalculator();
-        maxQuoteAgeLimitProvider = new StandardQuoteAgeLimitProvider();
+    public DukeOnlineInsuranceBroker(QuotingSystem pQuotingSystem, PurchaseService pPurchaseService, AdminChargeCalculator pAdminChargeCalculator, QuoteAgeLimitProvider pMaxQuoteAgeLimitProvider) {
+        quotingSystem = pQuotingSystem;
+        purchaseCompletionService = pPurchaseService;
+        adminChargeCalculator = pAdminChargeCalculator;
+        maxQuoteAgeLimitProvider = pMaxQuoteAgeLimitProvider;
     }
 
     @Override
