@@ -1,9 +1,7 @@
 package com.duke;
 
-import com.duke.insurance.ProductionPurchaseCompletionSystem;
 import com.duke.insurance.Purchase;
 import com.duke.search.Policy;
-import com.duke.search.ProductionQuotingSystem;
 import com.duke.search.Quote;
 
 import java.math.BigDecimal;
@@ -11,12 +9,10 @@ import java.util.*;
 
 public class DukeOnlineInsuranceBroker implements InsuranceBroker {
 
-    private static final long MAX_QUOTE_AGE_MILLIS = 15 * 60 * 1000;
-
-    public static final BigDecimal STANDARD_ADMIN_CHARGE = new BigDecimal(10);
-
     private final QuotingSystem quotingSystem;
     private final PurchaseService purchaseCompletionService;
+    private final StandardAdminChargeCalculator adminChargeCalculator;
+    private final StandardQuoteAgeLimitProvider maxQuoteAgeLimitProvider;
 
     private Map<UUID, Quote> quotes = new HashMap<UUID, Quote>();
 
@@ -24,6 +20,8 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
 
         quotingSystem = new OxQuotingSystem();
         purchaseCompletionService = new OxPurchaseCompletionSystem();
+        adminChargeCalculator = new StandardAdminChargeCalculator();
+        maxQuoteAgeLimitProvider = new StandardQuoteAgeLimitProvider();
     }
 
     @Override
@@ -44,14 +42,16 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
         }
 
         Quote quote = quotes.get(id);
-
         long timeNow = System.currentTimeMillis();
+        long maxAgeMillis = maxQuoteAgeLimitProvider.GetMaxQuoteAgeMillis();
+        BigDecimal adminFee = adminChargeCalculator.GetAdminFee();
 
-        if (timeNow - quote.timestamp > MAX_QUOTE_AGE_MILLIS) {
+        if (timeNow - quote.timestamp > maxAgeMillis) {
             throw new IllegalStateException("Quote expired, please search again.");
         }
 
-        Purchase completePurchase = new Purchase(quote.policy.premium.add(STANDARD_ADMIN_CHARGE), quote, timeNow, userAuthToken);
+        BigDecimal premiumWithAdminFee = quote.policy.premium.add(adminFee);
+        Purchase completePurchase = new Purchase(premiumWithAdminFee, quote, timeNow, userAuthToken);
 
         purchaseCompletionService.process(completePurchase);
     }
