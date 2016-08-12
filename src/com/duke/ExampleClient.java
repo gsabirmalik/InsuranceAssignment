@@ -4,9 +4,6 @@ import com.duke.search.Policy;
 import java.math.BigDecimal;
 import java.util.*;
 
-/**
- * Created by ghulam on 08/08/2016.
- */
 public class ExampleClient {
     public static void main(String[] args) throws Exception
     {

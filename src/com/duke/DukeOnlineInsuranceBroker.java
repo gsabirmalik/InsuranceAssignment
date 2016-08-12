@@ -3,7 +3,6 @@ package com.duke;
 import com.duke.insurance.Purchase;
 import com.duke.search.Policy;
 import com.duke.search.Quote;
-
 import java.math.BigDecimal;
 import java.util.*;
 

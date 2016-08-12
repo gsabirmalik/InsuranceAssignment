@@ -5,9 +5,6 @@ import com.duke.search.ProductionQuotingSystem;
 
 import java.util.List;
 
-/**
- * Created by ghulam on 09/08/2016.
- */
 public class OxQuotingSystem implements QuotingSystem {
 
     static QuotingSystem quotingSystem = ProductionQuotingSystem.getInstance();
