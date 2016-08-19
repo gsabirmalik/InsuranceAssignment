@@ -12,21 +12,15 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
     private final PurchaseService purchaseCompletionService;
     private final AdminChargeCalculator adminChargeCalculator;
     private final QuoteAgeLimitProvider maxQuoteAgeLimitProvider;
-
+    private final TimeKeeper timeKeeper;
     private Map<UUID, Quote> quotes = new HashMap<UUID, Quote>();
 
-//    public DukeOnlineInsuranceBroker() {
-//        quotingSystem = new OxQuotingSystem();
-//        purchaseCompletionService = new OxPurchaseCompletionSystem();
-//        adminChargeCalculator = new StandardAdminChargeCalculator();
-//        maxQuoteAgeLimitProvider = new StandardQuoteAgeLimitProvider();
-//    }
-
-    public DukeOnlineInsuranceBroker(QuotingSystem pQuotingSystem, PurchaseService pPurchaseService, AdminChargeCalculator pAdminChargeCalculator, QuoteAgeLimitProvider pMaxQuoteAgeLimitProvider) {
+    public DukeOnlineInsuranceBroker(QuotingSystem pQuotingSystem, PurchaseService pPurchaseService, AdminChargeCalculator pAdminChargeCalculator, QuoteAgeLimitProvider pMaxQuoteAgeLimitProvider, TimeKeeper pTimeKeeper) {
         quotingSystem = pQuotingSystem;
         purchaseCompletionService = pPurchaseService;
         adminChargeCalculator = pAdminChargeCalculator;
         maxQuoteAgeLimitProvider = pMaxQuoteAgeLimitProvider;
+        timeKeeper = pTimeKeeper;
     }
 
     @Override
@@ -34,7 +28,7 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
 
         List<Policy> searchResults = quotingSystem.searchFor(make, model, year);
         for (Policy policy : searchResults) {
-            quotes.put(policy.id, new Quote(policy, System.currentTimeMillis()));
+            quotes.put(policy.id, new Quote(policy, timeKeeper.getCurrentTimeMillis()));
         }
         return searchResults;
     }
@@ -47,13 +41,13 @@ public class DukeOnlineInsuranceBroker implements InsuranceBroker {
         }
 
         Quote quote = quotes.get(id);
-        long timeNow = System.currentTimeMillis();
+        long timeNow = timeKeeper.getCurrentTimeMillis();
         long maxAgeMillis = maxQuoteAgeLimitProvider.GetMaxQuoteAgeMillis();
-        BigDecimal adminFee = adminChargeCalculator.GetAdminFee();
 
         if (timeNow - quote.timestamp > maxAgeMillis) {
             throw new IllegalStateException("Quote expired, please search again.");
         }
+        BigDecimal adminFee = adminChargeCalculator.GetAdminFee(quote, timeKeeper);
 
         BigDecimal premiumWithAdminFee = quote.policy.premium.add(adminFee);
         Purchase completePurchase = new Purchase(premiumWithAdminFee, quote, timeNow, userAuthToken);
