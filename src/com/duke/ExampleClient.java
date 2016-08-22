@@ -8,7 +8,8 @@ public class ExampleClient {
     public static void main(String[] args) throws Exception
     {
         InsuranceBroker insuranceBroker = new DukeOnlineInsuranceBroker(new OxQuotingSystem(), new OxPurchaseCompletionSystem(), new OxAdminChargeCalculator(), new StandardQuoteAgeLimitProvider(), new SystemTimeKeeper());
-        String userAuthToken = "tom@example.com";
+        String userAuthToken = ApplicationConfig.AuthenticationToken();// "tom@example.com";
+//        ApplicationConfig
         List<Policy> searchResults = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014);
         // try also Toyota Prius, Tesla Model S, etc
 

@@ -30,7 +30,7 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
         }};
         context.checking(expectations);
 
-        insuranceBroker.confirmPurchase(insurancePolicy.id, "sabir@hotmail.com");
+        insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
     }
 
     @Test
@@ -41,7 +41,7 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
 
         fakeTimeKeeper.addFakeElapsedMilliSecs(getMilliSecsFromMinutes(16));
         try {
-            insuranceBroker.confirmPurchase(insurancePolicy.id, "sabir@hotmail.com");
+            insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
         } catch (IllegalStateException ex) {
             assertTrue(true);
             return;
@@ -60,7 +60,7 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
         Policy insurancePolicy = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014).get(0);
 
         fakeTimeKeeper.addFakeElapsedMilliSecs(getMilliSecsFromMinutes(2));
-        insuranceBroker.confirmPurchase(insurancePolicy.id, "sabir@hotmail.com");
+        insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
 
         assertEquals("Purchase Confirmed within 3 minutes should add zero admin fee. ", insurancePolicy.premium, fakePurchaseService.getProcessedPurchase().totalPrice);
     }
@@ -75,7 +75,7 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
         Policy insurancePolicy = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014).get(0);
 
         fakeTimeKeeper.addFakeElapsedMilliSecs(getMilliSecsFromMinutes(5));
-        insuranceBroker.confirmPurchase(insurancePolicy.id, "sabir@hotmail.com");
+        insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
 
         assertEquals("Purchase Confirmed After 3 Minutes but Within 10 Minutes Should Be Processed With £15 Admin Charge When 5% Of Premium is Less Than 15.", new BigDecimal(115), fakePurchaseService.getProcessedPurchase().totalPrice);
     }
@@ -91,7 +91,7 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
         Policy insurancePolicy = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014).get(0);
 
         fakeTimeKeeper.addFakeElapsedMilliSecs(getMilliSecsFromMinutes(5));
-        insuranceBroker.confirmPurchase(insurancePolicy.id, "sabir@hotmail.com");
+        insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
 
         assertEquals("Purchase Confirmed After 3 Minutes but Within 10 Minutes Should Be Processed With Admin Charge of 5% of Premium When 5% Of Premium is more Than 15.", new BigDecimal(525), fakePurchaseService.getProcessedPurchase().totalPrice);
     }
@@ -107,7 +107,7 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
         Policy insurancePolicy = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014).get(0);
 
         fakeTimeKeeper.addFakeElapsedMilliSecs(getMilliSecsFromMinutes(11));
-        insuranceBroker.confirmPurchase(insurancePolicy.id, "sabir@hotmail.com");
+        insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
 
         assertEquals("Purchase Confirmed After 10 Minutes but Within 15 Minutes Should Be Processed With £40 Admin Charge When 10% Of Premium is Less Than 40.", new BigDecimal(140), fakePurchaseService.getProcessedPurchase().totalPrice);
     }
@@ -123,9 +123,15 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
         Policy insurancePolicy = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014).get(0);
 
         fakeTimeKeeper.addFakeElapsedMilliSecs(getMilliSecsFromMinutes(11));
-        insuranceBroker.confirmPurchase(insurancePolicy.id, "sabir@hotmail.com");
+        insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
 
         assertEquals("Purchase Confirmed After 10 Minutes but Within 15 Minutes Should Be Processed With Admin Charge of 10% of Premium When 10% Of Premium is more Than 40.", new BigDecimal(550), fakePurchaseService.getProcessedPurchase().totalPrice);
+    }
+
+    @Test
+    public void authenticationTokenShouldBeRetrievedFromPorperties(){
+        String authenticationToken = ApplicationConfig.AuthenticationToken();
+        assertEquals("Authentication token should be retrieved from ApplicationConfig.properties", "sabir@ox.com", authenticationToken);
     }
 
     private long getMilliSecsFromMinutes(long minutes) {
