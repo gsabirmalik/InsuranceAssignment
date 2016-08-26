@@ -3,6 +3,8 @@ package com.duke;
 import com.duke.insurance.Purchase;
 import com.duke.search.Policy;
 import org.jmock.Expectations;
+import org.jmock.States;
+import org.jmock.auto.Auto;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.internal.ExpectationBuilder;
 import org.junit.Rule;
@@ -132,6 +134,43 @@ public class DukeOnlineInsuranceBrokerPurchaseTest {
     public void authenticationTokenShouldBeRetrievedFromPorperties(){
         String authenticationToken = ApplicationConfig.AuthenticationToken();
         assertEquals("Authentication token should be retrieved from ApplicationConfig.properties", "sabir@ox.com", authenticationToken);
+    }
+
+    @Auto States purchaseState ;
+
+    @Test
+    public void purchaseShouldNotConfirmAfter15MinutesOfQuotationProductionUSING_jUnit_Mocking() {
+
+        JUnitRuleMockery timeKeeperContext = new JUnitRuleMockery();
+        TimeKeeper mockedTimeKeepr = timeKeeperContext.mock(TimeKeeper.class);
+
+        timeKeeperContext.checking(new Expectations(){
+            {
+                allowing(mockedTimeKeepr).getCurrentTimeMillis(); will(returnValue(System.currentTimeMillis()));
+                when(purchaseState.is("BeforePurchaseTrigger"));
+            }
+        });
+
+        timeKeeperContext.checking(new Expectations(){
+            {
+                allowing(mockedTimeKeepr).getCurrentTimeMillis(); will(returnValue(System.currentTimeMillis() + getMilliSecsFromMinutes(16)));
+                when(purchaseState.is("AfterPurchaseTrigger"));
+            }
+        });
+
+        purchaseState.startsAs("BeforePurchaseTrigger");
+        DukeOnlineInsuranceBroker insuranceBroker = new DukeOnlineInsuranceBroker(new FakeQuotingSystem(new BigDecimal(100)), new OxPurchaseCompletionSystem(), new OxAdminChargeCalculator(), new FakeQuoteAgeLimitProvider(), mockedTimeKeepr);
+        Policy insurancePolicy = insuranceBroker.searchForCarInsurance("Audi", "A1", 2014).get(0);
+
+
+        purchaseState.become("AfterPurchaseTrigger");
+        try {
+            insuranceBroker.confirmPurchase(insurancePolicy.id, ApplicationConfig.AuthenticationToken());
+        } catch (IllegalStateException ex) {
+            assertTrue(true);
+            return;
+        }
+        assertTrue(false);
     }
 
     private long getMilliSecsFromMinutes(long minutes) {
